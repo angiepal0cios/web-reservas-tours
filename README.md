@@ -60,8 +60,29 @@ Abre `http://localhost:5173`.
 
 Para generar la versión de producción: `npm run build` (queda en `dist/`).
 
+## Publicado en AWS
+
+🌐 **https://d1t39qdm4rka8n.cloudfront.net**
+
+```
+Navegador → CloudFront (HTTPS + CDN) → S3 privado (archivos de la web)
+         ↘ API Gateway → Lambda → DynamoDB (api-reservas-tours)
+```
+
+- **S3 privado:** el bucket no es público. Solo CloudFront puede leerlo, mediante *Origin Access Control*.
+- **CloudFront:** sirve la web por HTTPS desde servidores cercanos al usuario. Cualquier ruta que no sea un archivo devuelve `index.html`, para que funcionen los enlaces directos de React Router (por ejemplo `/tours/1`).
+- **Caché:** los archivos de `assets/` llevan un hash en el nombre y se cachean un año; `index.html` nunca se cachea, así siempre se ve la última versión.
+- **CORS:** la API solo acepta llamadas desde el dominio de CloudFront.
+
+La infraestructura está en [`infra/template.yaml`](infra/template.yaml) (CloudFormation). Para publicar una versión nueva:
+
+```bash
+.\deploy.ps1 -ApiUrl https://<id>.execute-api.us-east-2.amazonaws.com
+```
+
 ## Próximos pasos
+- [x] Publicar en AWS (S3 + CloudFront)
+- [ ] Reseñas de tours con análisis de sentimiento
 - [ ] Panel de administrador para crear y editar tours
 - [ ] Docker + docker compose para levantar API, base de datos y web juntos
-- [ ] Publicar en AWS (S3 + CloudFront)
 - [ ] Pruebas con Vitest y React Testing Library
